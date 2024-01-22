@@ -6,6 +6,8 @@ const {
 const path = require('path');
 
 const projDistPath = path.join(__dirname, 'project-dist');
+const assetsPath = path.join(__dirname, 'assets');
+const distAssetsPath = path.join(projDistPath, 'assets');
 const stylesPath = path.join(__dirname, 'styles');
 const distStylesPath = path.join(projDistPath, 'style.css');
 const templatePath = path.join(__dirname, 'template.html');
@@ -38,6 +40,26 @@ const mergeStyles = async (from, to) => {
     console.log('mergeStyles');
   } catch (err) {
     console.error(err.message);
+  }
+};
+
+const copyDir = async (from, to) => {
+  try {
+    await createDir(to);
+    const filesFromDir = await fsPromises.readdir(from, {
+      withFileTypes: true,
+    });
+    filesFromDir.forEach(async (file) => {
+      if (file.isFile())
+        await fsPromises.copyFile(
+          path.join(from, file.name),
+          path.join(to, file.name),
+        );
+      if (file.isDirectory())
+        await copyDir(path.join(from, file.name), path.join(to, file.name));
+    });
+  } catch (err) {
+    if (err) console.error(err.message);
   }
 };
 
@@ -78,6 +100,7 @@ const buildProjectDist = async () => {
   await createDir(projDistPath);
   await buildDocumentByTemplate(templatePath, indexHtmlPath, componentsPath);
   await mergeStyles(stylesPath, distStylesPath);
+  await copyDir(assetsPath, distAssetsPath);
 };
 
 buildProjectDist();
