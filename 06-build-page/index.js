@@ -5,20 +5,10 @@ const {
 } = require('fs');
 const path = require('path');
 
-const projDistPath = path.join(__dirname, 'project-dist');
-const assetsPath = path.join(__dirname, 'assets');
-const distAssetsPath = path.join(projDistPath, 'assets');
-const stylesPath = path.join(__dirname, 'styles');
-const distStylesPath = path.join(projDistPath, 'style.css');
-const templatePath = path.join(__dirname, 'template.html');
-const componentsPath = path.join(__dirname, 'components');
-const indexHtmlPath = path.join(projDistPath, 'index.html');
-
 const createDir = async (dirPath) => {
   try {
     await fsPromises.rm(dirPath, { recursive: true, force: true });
     await fsPromises.mkdir(dirPath, { recursive: true });
-    console.log('createDir');
   } catch (err) {
     console.error(err.message);
   }
@@ -37,7 +27,6 @@ const mergeStyles = async (from, to) => {
         readStylesStream.pipe(writeStream);
       }
     });
-    console.log('mergeStyles');
   } catch (err) {
     console.error(err.message);
   }
@@ -90,17 +79,25 @@ const buildDocumentByTemplate = async (
       }
     }
     await fsPromises.writeFile(toDistIndex, data);
-    console.log('buildDocumentByTemplate');
   } catch (err) {
     console.error(err.message);
   }
 };
 
-const buildProjectDist = async () => {
+const buildProjectBundle = async () => {
+  const projDistPath = path.join(__dirname, 'project-dist');
+  const assetsPath = path.join(__dirname, 'assets');
+  const distAssetsPath = path.join(projDistPath, 'assets');
+  const stylesPath = path.join(__dirname, 'styles');
+  const distStylesPath = path.join(projDistPath, 'style.css');
+  const templatePath = path.join(__dirname, 'template.html');
+  const componentsPath = path.join(__dirname, 'components');
+  const indexHtmlPath = path.join(projDistPath, 'index.html');
+
   await createDir(projDistPath);
   await buildDocumentByTemplate(templatePath, indexHtmlPath, componentsPath);
   await mergeStyles(stylesPath, distStylesPath);
   await copyDir(assetsPath, distAssetsPath);
 };
 
-buildProjectDist();
+buildProjectBundle();
